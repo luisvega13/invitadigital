@@ -1,0 +1,2 @@
+import {MessageCircle} from "lucide-react";import {generateWhatsAppUrl,whatsappMessages} from "@/lib/whatsapp";
+export function WhatsAppFloating(){return <a href={generateWhatsAppUrl(whatsappMessages.general)} target="_blank" aria-label="Cotiza tu invitación por WhatsApp" title="Cotiza tu invitación" className="fixed bottom-5 right-5 z-40 grid size-14 place-items-center rounded-full bg-[#25D366] text-white shadow-xl transition hover:scale-105"><MessageCircle/></a>}
