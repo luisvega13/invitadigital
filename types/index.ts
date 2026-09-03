@@ -1,0 +1,2 @@
+export type TemplateItem={id:string;name:string;slug:string;category:string;style:string;price:number;previousPrice?:number|null;shortDescription:string;description:string;coverImage:string;images:string[];demoUrl:string;whatsappMessage?:string|null;features:string[];isFeatured:boolean;isPopular:boolean;isNew:boolean;active?:boolean;views:number};
+export type ProjectItem={id:string;name:string;slug:string;eventType:string;description:string;coverImage:string;images:string[];demoUrl:string;features:string[];eventDate?:string;featured:boolean};

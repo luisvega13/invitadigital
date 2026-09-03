@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  ADMIN
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  IN_PROGRESS
+  CLOSED
+  CANCELLED
+}
+
+enum ServiceType {
+  TEMPLATE
+  CUSTOM
+  UNSURE
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(ADMIN)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Category {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  description String?
+  icon        String?
+  active      Boolean    @default(true)
+  templates   Template[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Template {
+  id               String   @id @default(cuid())
+  name             String
+  slug             String   @unique
+  shortDescription String
+  description      String
+  categoryId       String
+  category         Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  style            String
+  price            Decimal  @db.Decimal(10, 2)
+  previousPrice    Decimal? @db.Decimal(10, 2)
+  coverImage       String
+  images           String[]
+  demoUrl          String?
+  whatsappMessage  String?
+  features         String[]
+  isFeatured       Boolean  @default(false)
+  isPopular        Boolean  @default(false)
+  isNew            Boolean  @default(false)
+  active           Boolean  @default(true)
+  views            Int      @default(0)
+  leads            Lead[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model PortfolioProject {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  eventType   String
+  description String
+  coverImage  String
+  images      String[]
+  demoUrl     String?
+  features    String[]
+  eventDate   DateTime?
+  featured    Boolean   @default(false)
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Lead {
+  id          String      @id @default(cuid())
+  name        String
+  phone       String
+  email       String?
+  eventType   String
+  eventDate   DateTime?
+  guestCount  Int?
+  serviceType ServiceType
+  templateId  String?
+  template    Template?   @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  message     String
+  status      LeadStatus  @default(NEW)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model SiteSettings {
+  id                   String   @id @default("main")
+  businessName         String   @default("INVITA DIGITAL")
+  slogan               String   @default("Invitaciones que cuentan historias")
+  phone                String   @default("449 338 4180")
+  whatsapp             String   @default("524493384180")
+  email                String   @default("invitadigital.contacto@gmail.com")
+  instagram            String?
+  facebook             String?
+  tiktok               String?
+  templateBasePrice    Decimal  @db.Decimal(10, 2)
+  premiumTemplatePrice Decimal  @db.Decimal(10, 2)
+  customBasePrice      Decimal  @db.Decimal(10, 2)
+  updatedAt            DateTime @updatedAt
+}

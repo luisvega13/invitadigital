@@ -1,0 +1,1 @@
+export function AdminHeader({title,copy,action}:{title:string;copy:string;action?:React.ReactNode}){return <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center"><div><h1 className="display text-4xl text-navy">{title}</h1><p className="mt-2 text-sm text-slate-500">{copy}</p></div>{action}</div>}

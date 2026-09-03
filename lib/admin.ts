@@ -1,0 +1,1 @@
+import {auth} from "@/auth";import {NextResponse} from "next/server";export async function requireAdmin(){const session=await auth();return session?.user?.role==="ADMIN"?null:NextResponse.json({error:"No autorizado"},{status:401})}
