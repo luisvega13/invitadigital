@@ -2,6 +2,7 @@ import "server-only";
 import {createClient} from "@supabase/supabase-js";
 
 const bucket=process.env.SUPABASE_STORAGE_BUCKET||"invitaciones";
+let bucketReady:Promise<void>|undefined;
 
 function adminClient(){
   const url=process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -10,15 +11,26 @@ function adminClient(){
   return createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
 }
 
+async function prepareBucket(){
+  const client=adminClient();
+  const existing=await client.storage.getBucket(bucket);
+  if(!existing.error)return;
+  if(existing.error.statusCode!=="404")throw new Error(`No se pudo comprobar el bucket: ${existing.error.message}`);
+
+  const created=await client.storage.createBucket(bucket,{public:true,fileSizeLimit:5*1024*1024,allowedMimeTypes:["image/webp"]});
+  if(created.error&&created.error.statusCode!=="409")throw new Error(`No se pudo preparar el bucket: ${created.error.message}`);
+}
+
+async function ensureBucket(){
+  bucketReady??=prepareBucket().catch(error=>{bucketReady=undefined;throw error});
+  await bucketReady;
+}
+
 export async function uploadTemplateCover(file:File,slug:string){
   if(file.type!=="image/webp")throw new Error("La portada debe estar en formato WebP.");
   if(file.size>5*1024*1024)throw new Error("La imagen no puede superar 5 MB.");
   const client=adminClient();
-  const existing=await client.storage.getBucket(bucket);
-  if(existing.error){
-    const created=await client.storage.createBucket(bucket,{public:true,fileSizeLimit:5*1024*1024,allowedMimeTypes:["image/webp"]});
-    if(created.error)throw new Error(`No se pudo preparar el bucket: ${created.error.message}`);
-  }
+  await ensureBucket();
   const safeSlug=slug.replace(/[^a-z0-9-]/g,"-");
   const path=`templates/${safeSlug}/${crypto.randomUUID()}.webp`;
   const bytes=await file.arrayBuffer();
